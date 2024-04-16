@@ -44,7 +44,6 @@ def create_model_S4D(cond_dim, input_dim, units, order, film, glu, gcu, gaf, act
         
         decoder_outputs = tf.math.pow(decoder_outputs, order)
         decoder_outputs = Multiply()([decoder_outputs, g])
-        #decoder_outputs = Add()([decoder_outputs3, decoder_outputs])
         decoder_outputs = Add()([decoder_outputs, b])
 
         if glu:
