@@ -13,7 +13,7 @@ def create_model_S4D(cond_dim, input_dim, units, order, film, glu, gcu, gaf, act
     decoder_inputs = tf.keras.layers.Input(batch_shape=(b_size, T), name='dec_input')
     decoder_outputs = tf.keras.layers.Dense(units//2, input_shape=(b_size, T), name='LinearProjection')(decoder_inputs)
     
-    #decoder_outputs = S4D(units//2)(decoder_outputs)
+    #decoder_outputs = S4D(units//2, b_size)(decoder_outputs)
     #decoder_outputs = tf.keras.layers.Dense(units//2, activation='softsign', name='NonlinearDenseLayer')(decoder_outputs)
     
     #if film:
@@ -34,7 +34,7 @@ def create_model_S4D(cond_dim, input_dim, units, order, film, glu, gcu, gaf, act
     #        cond_inputs = tf.keras.layers.Input(batch_shape=(b_size, D), name='cond')
     #        decoder_outputs = GAF(in_size=units//2)(decoder_outputs, cond_inputs)
         
-    decoder_outputs = S4D(units//2)(decoder_outputs)
+    decoder_outputs = S4D(units//2, b_size)(decoder_outputs)
     decoder_outputs = tf.keras.layers.Dense(units//2, activation='softsign', name='NonlinearDenseLayer2')(decoder_outputs)
            
     if film:
