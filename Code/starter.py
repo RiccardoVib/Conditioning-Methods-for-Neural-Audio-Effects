@@ -15,7 +15,7 @@ b_size = 600 # batch size
 lr = 3e-4 # initial learning rate
 
 model = 'S4D'
-dataset = ['SphereC', '8D'] # name of the dataset
+datasets = ['SphereC', '8D'] # name of the dataset
 
 
 conditioning = True # if conditioning included
@@ -28,20 +28,20 @@ gcu = False # if use GCU
 
 name_model = ''
 
-
-train(data_dir=data_dir,
-      save_folder=model+dataset+name_model,
-      dataset=dataset,
-      b_size=b_size,
-      order=order,
-      glu=glu,
-      gcu=gcu,
-      gaf=gaf,
-      conditioning=conditioning,
-      act=None,
-      film=film,
-      learning_rate=lr,
-      units=units,
-      epochs=epochs,
-      model=model,
-      inference=False)
+for dataset in datasets:
+      train(data_dir=data_dir,
+            save_folder=model+dataset+name_model,
+            dataset=dataset,
+            b_size=b_size,
+            order=order,
+            glu=glu,
+            gcu=gcu,
+            gaf=gaf,
+            conditioning=conditioning,
+            act=None,
+            film=film,
+            learning_rate=lr,
+            units=units,
+            epochs=epochs,
+            model=model,
+            inference=False)
