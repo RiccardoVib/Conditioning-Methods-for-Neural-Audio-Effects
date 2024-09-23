@@ -4,9 +4,18 @@ from tensorflow.keras.layers import Input, Dense, GRU, Add, LSTM, Multiply
 from Layers import GLU, S4D, GAF, GCU
 
 
-def create_model_S4D(cond_dim, input_dim, units, order, film, glu, gcu, gaf, act=None, b_size=2399, drop=0.):
-    T = input_dim
-    D = cond_dim
+def create_model_S4D(D, T, units, order, film, glu, gcu, gaf, act=None, b_size=2399, drop=0.):
+    """ 
+    S4D model
+    :param T: input size
+    :param D: number of conditioning parameters
+    :param units: number of units
+    :param order: order of transformation in the FiLM layer
+    :param glu: if true GLU is placed after FiLM
+    :param gcu: if true GCU is placed after FiLM
+    :param gaf: if true GAF is placed after FiLM
+    :param act: activation function
+    """
     if film == False and gaf == False:
         T = T + 2
     # Defining decoder inputs
@@ -35,7 +44,7 @@ def create_model_S4D(cond_dim, input_dim, units, order, film, glu, gcu, gaf, act
     #        decoder_outputs = GAF(in_size=units//2)(decoder_outputs, cond_inputs)
         
     decoder_outputs = S4D(units//2, b_size)(decoder_outputs)
-    decoder_outputs = tf.keras.layers.Dense(units//2, activation='softsign', name='NonlinearDenseLayer2')(decoder_outputs)
+    decoder_outputs = tf.keras.layers.Dense(units//2, activation='softsign', name='NonlinearDenseLayer')(decoder_outputs)
            
     if film:
         cond_inputs = tf.keras.layers.Input(batch_shape=(b_size, D), name='cond')
