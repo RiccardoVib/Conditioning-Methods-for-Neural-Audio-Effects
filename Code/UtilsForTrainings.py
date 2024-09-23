@@ -10,14 +10,19 @@ from scipy import fft
 from Utils import filterAudio
 
 class MyLRScheduler(tf.keras.optimizers.schedules.LearningRateSchedule):
-    def __init__(self, initial_learning_rate, training_steps, epochs, order):
+    """
+    Define the learning schedule
+      :param initial_learning_rate: the initial learning rate [float]
+      :param training_steps: the number of total training steps (iterations) [int]
+    """
+    def __init__(self, initial_learning_rate, training_steps):
         self.initial_learning_rate = initial_learning_rate
-        self.steps = training_steps*epochs
-        self.order = order
-    def __call__(self, step):         
-        lr = tf.cast(self.initial_learning_rate / ( tf.cast(step/self.steps, dtype=tf.float32) + 1.)**self.order, dtype=tf.float32)
-    #tf.cast(self.initial_learning_rate * (0.25 ** (tf.cast(step / self.steps, dtype=tf.float32))), dtype=tf.float32)
-        return tf.math.maximum(lr, 1e-6) 
+        self.steps = training_steps * 30
+
+    def __call__(self, step):
+        lr = tf.cast(self.initial_learning_rate * (0.25 ** (tf.cast(step / self.steps, dtype=tf.float32))),
+                     dtype=tf.float32)
+        return lr#tf.math.maximum(lr, 1e-6)
     
 
     
