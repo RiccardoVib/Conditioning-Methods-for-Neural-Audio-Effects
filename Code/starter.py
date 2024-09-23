@@ -1,182 +1,33 @@
 from Training import train
 
 
-data_dir = '../../Files/CondPaper'
-epochs = [30, 60]
-units = 16
-b_size = 600
-lr = 3e-4
+"""
+main script
+
+"""
+
+# data_dir: the directory in which datasets are stored
+data_dir = '../../Files/'
+epochs = 200 # number of epochs
+units = 16 # number of model's units
+b_size = 600 # batch size
+
+lr = 3e-4 # initial learning rate
+
 model = 'S4D'
-conditioning = True
-film = True
-gaf = False
-
-dataset = 'SphereC'
-
-name_model = '_order3linGLU_post'
-order = 3
-glu = True
-gcu = False
-
-train(data_dir=data_dir,
-      save_folder=model+dataset+name_model,
-      dataset=dataset,
-      b_size=b_size,
-      order=order,
-      glu=glu,
-      gcu=gcu,
-      gaf=gaf,
-      conditioning=conditioning,
-      act=None,
-      film=film,
-      learning_rate=lr,
-      units=units,
-      epochs=epochs,
-      model=model,
-      inference=False)
-
-epochs = [1, 60]
-dataset = '8D'
-
-name_model = '_order3linGLU_post'
-order = 3
-
-train(data_dir=data_dir,
-      save_folder=model+dataset+name_model,
-      dataset=dataset,
-      b_size=b_size,
-      order=order,
-      glu=glu,
-      gcu=gcu,
-      gaf=gaf,
-      conditioning=conditioning,
-      act=None,
-      film=film,
-      learning_rate=lr,
-      units=units,
-      epochs=epochs,
-      model=model,
-      inference=False)
+dataset = ['SphereC', '8D'] # name of the dataset
 
 
-dataset = 'SphereC'
-
-name_model = '_order3linGLU_post'
-order = 5
-
-
-train(data_dir=data_dir,
-      save_folder=model+dataset+name_model,
-      dataset=dataset,
-      b_size=b_size,
-      order=order,
-      glu=glu,
-      gcu=gcu,
-      gaf=gaf,
-      conditioning=conditioning,
-      act=None,
-      film=film,
-      learning_rate=lr,
-      units=units,
-      epochs=epochs,
-      model=model,
-      inference=False)
-
-dataset = '8D'
-
-name_model = '_order5linGLU_post'
-order = 5
-
-train(data_dir=data_dir,
-      save_folder=model+dataset+name_model,
-      dataset=dataset,
-      b_size=b_size,
-      order=order,
-      glu=glu,
-      gcu=gcu,
-      gaf=gaf,
-      conditioning=conditioning,
-      act=None,
-      film=film,
-      learning_rate=lr,
-      units=units,
-      epochs=epochs,
-      model=model,
-      inference=False)
-
-dataset = 'SphereC'
-
-name_model = '_order3linGCU_post'
-order = 3
-glu = False
-gcu = True
-
-train(data_dir=data_dir,
-      save_folder=model+dataset+name_model,
-      dataset=dataset,
-      b_size=b_size,
-      order=order,
-      glu=glu,
-      gcu=gcu,
-      gaf=gaf,
-      conditioning=conditioning,
-      act=None,
-      film=film,
-      learning_rate=lr,
-      units=units,
-      epochs=epochs,
-      model=model,
-      inference=False)
-
-dataset = '8D'
-
-name_model = '_order3linGCU_post'
-order = 3
-
-train(data_dir=data_dir,
-      save_folder=model+dataset+name_model,
-      dataset=dataset,
-      b_size=b_size,
-      order=order,
-      glu=glu,
-      gcu=gcu,
-      gaf=gaf,
-      conditioning=conditioning,
-      act=None,
-      film=film,
-      learning_rate=lr,
-      units=units,
-      epochs=epochs,
-      model=model,
-      inference=False)
+conditioning = True # if conditioning included
+film = True # if use Film layer
+gaf = False # if use GAF layer
+order = 3 # order of transformation in Film
+glu = True  # if use GLU
+gcu = False # if use GCU
 
 
-dataset = 'SphereC'
+name_model = ''
 
-name_model = '_order5linGCU_post'
-order = 5
-
-train(data_dir=data_dir,
-      save_folder=model+dataset+name_model,
-      dataset=dataset,
-      b_size=b_size,
-      order=order,
-      glu=glu,
-      gcu=gcu,
-      gaf=gaf,
-      conditioning=conditioning,
-      act=None,
-      film=film,
-      learning_rate=lr,
-      units=units,
-      epochs=epochs,
-      model=model,
-      inference=False)
-
-dataset = '8D'
-
-name_model = '_order5linGCU_post'
-order = 5
 
 train(data_dir=data_dir,
       save_folder=model+dataset+name_model,
