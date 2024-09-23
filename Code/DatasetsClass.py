@@ -11,18 +11,24 @@ class DataGeneratorPickles(Sequence):
 
     def __init__(self, data_dir, filename, input_enc_size, input_dec_size, cond_size, model, conditioning, batch_size=10):
         """
-        Initializes a data generator object
+        Initializes a data generator object for the CL1B dataset
           :param data_dir: the directory in which data are stored
-          :param output_size: output size
+          :param filename: the name of the dataset
+          :param input_enc_size: the encoder input size
+          :param input_dec_size: the decoder input size
+          :param cond_size: the number of device's parameters
+          :param model: the model object
+          :param conditioning: if false the input and conditioning parameters are concatenated in the same vector
           :param batch_size: The size of each batch returned by __getitem__
         """
+        # prepare the input, target, and conditioning matrix
         file_data = open(os.path.normpath('/'.join([data_dir, filename])), 'rb')
         Z = pickle.load(file_data)
         
         self.x = np.array(Z['x'][:, :], dtype=np.float32)
         self.y = np.array(Z['y'][:, :], dtype=np.float32)
-        #self.x = filterAudio(self.x)
-        #self.y = filterAudio(self.y)
+
+        # windowning to avoid misalignments
         self.x = self.x * np.array(tukey(self.x.shape[1], alpha=0.005), dtype=np.float32).reshape(1,-1)
         self.y = self.y * np.array(tukey(self.x.shape[1], alpha=0.005), dtype=np.float32).reshape(1,-1)
 
@@ -31,6 +37,8 @@ class DataGeneratorPickles(Sequence):
         rep = self.x.shape[1]
         self.x = self.x.reshape(-1)
         self.y = self.y.reshape(-1)
+        
+        # remove the last samples if not enough for a batch
         lim = int((self.x.shape[0] / self.batch_size) * self.batch_size)
         self.x = self.x[:lim]
         self.y = self.y[:lim]
@@ -44,6 +52,8 @@ class DataGeneratorPickles(Sequence):
         self.input_enc_size = input_enc_size
         self.input_dec_size = input_dec_size
         self.window = int(self.input_enc_size + self.input_dec_size)
+        
+        # the number of iterations per epoch
         self.training_steps = (lim // self.batch_size)
 
         self.cond_size = cond_size
@@ -51,9 +61,11 @@ class DataGeneratorPickles(Sequence):
         self.on_epoch_end()
 
     def on_epoch_end(self):
+        # create/reset the vector containing the indices of the batches
         self.indices = np.arange(self.x.shape[0] + self.window)
 
     def __len__(self):
+        # compute the needed number of iterations before conclude one epoch
         return int((self.x.shape[0]) / self.batch_size)-1
 
     def __call__(self):
@@ -63,7 +75,8 @@ class DataGeneratorPickles(Sequence):
                 self.on_epoch_end()
 
     def __getitem__(self, idx):
-        ## Initializing Batch
+        # Initializing input, target, and conditioning batches
+
         X = []#np.empty((self.batch_size, 2*self.w))
         Y = []#np.empty((self.batch_size, self.output_size))
         Z = []#np.empty((self.batch_size, self.cond_size))
@@ -71,6 +84,7 @@ class DataGeneratorPickles(Sequence):
         # get the indices of the requested batch
         indices = self.indices[idx*self.batch_size:(idx+1)*self.batch_size] + self.window
 
+        # fill the batches
         if self.cond_size != 0:
             for t in range(indices[0], indices[-1] + 1, 1):
                 X.append(np.array(self.x[t - self.window: t]).T)
