@@ -10,7 +10,6 @@ import sys
 import time
 
 def train(**kwargs):
-    def train(**kwargs):
     """
       :param data_dir: the directory in which dataset are stored [string]
       :param batch_size: the size of each batch [int]
