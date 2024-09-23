@@ -4,7 +4,7 @@ from tensorflow.keras.layers import Input, Dense, GRU, Add, LSTM, Multiply
 from Layers import GLU, S4D, GAF, GCU
 
 
-def create_model_S4D(D, T, units, order, film, glu, gcu, gaf, act=None, b_size=2399, drop=0.):
+def create_model_S4D(D, T, units, order, film, glu, gcu, gaf, act=None, batch_size=2399):
     """ 
     S4D model
     :param T: input size
@@ -15,12 +15,13 @@ def create_model_S4D(D, T, units, order, film, glu, gcu, gaf, act=None, b_size=2
     :param gcu: if true GCU is placed after FiLM
     :param gaf: if true GAF is placed after FiLM
     :param act: activation function
+    :param batch_size: batch size
     """
     if film == False and gaf == False:
         T = T + 2
     # Defining decoder inputs
-    decoder_inputs = tf.keras.layers.Input(batch_shape=(b_size, T), name='dec_input')
-    decoder_outputs = tf.keras.layers.Dense(units//2, input_shape=(b_size, T), name='LinearProjection')(decoder_inputs)
+    decoder_inputs = tf.keras.layers.Input(batch_shape=(batch_size, T), name='dec_input')
+    decoder_outputs = tf.keras.layers.Dense(units//2, input_shape=(batch_size, T), name='LinearProjection')(decoder_inputs)
     
     #decoder_outputs = S4D(units//2, b_size)(decoder_outputs)
     #decoder_outputs = tf.keras.layers.Dense(units//2, activation='softsign', name='NonlinearDenseLayer')(decoder_outputs)
@@ -43,12 +44,12 @@ def create_model_S4D(D, T, units, order, film, glu, gcu, gaf, act=None, b_size=2
     #        cond_inputs = tf.keras.layers.Input(batch_shape=(b_size, D), name='cond')
     #        decoder_outputs = GAF(in_size=units//2)(decoder_outputs, cond_inputs)
         
-    decoder_outputs = S4D(units//2, b_size)(decoder_outputs)
+    decoder_outputs = S4D(units//2, batch_size)(decoder_outputs)
     decoder_outputs = tf.keras.layers.Dense(units//2, activation='softsign', name='NonlinearDenseLayer')(decoder_outputs)
            
     if film:
-        cond_inputs = tf.keras.layers.Input(batch_shape=(b_size, D), name='cond')
-        coeffs = Dense(2*(units // 2), activation=act, batch_input_shape=(b_size, D))(cond_inputs)
+        cond_inputs = tf.keras.layers.Input(batch_shape=(batch_size, D), name='cond')
+        coeffs = Dense(2*(units // 2), activation=act, batch_input_shape=(batch_size, D))(cond_inputs)
         g, b = tf.split(coeffs, 2, axis=-1)
         
         decoder_outputs = tf.math.pow(decoder_outputs, order)
@@ -61,7 +62,7 @@ def create_model_S4D(D, T, units, order, film, glu, gcu, gaf, act=None, b_size=2
             decoder_outputs = GCU(in_size=units//2)(decoder_outputs)
 
     elif gaf:
-            cond_inputs = tf.keras.layers.Input(batch_shape=(b_size, D), name='cond')
+            cond_inputs = tf.keras.layers.Input(batch_shape=(batch_size, D), name='cond')
             decoder_outputs = GAF(in_size=units//2)(decoder_outputs, cond_inputs) 
      
     decoder_outputs = tf.keras.layers.Dense(1, name='OutLayer')(decoder_outputs)

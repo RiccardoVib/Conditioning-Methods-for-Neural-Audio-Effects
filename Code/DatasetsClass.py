@@ -2,8 +2,6 @@ import pickle
 import os
 import numpy as np
 from tensorflow.keras.utils import Sequence
-import tensorflow as tf
-from Utils import filterAudio
 from scipy.signal.windows import tukey
 
 
@@ -94,7 +92,7 @@ class DataGeneratorPickles(Sequence):
                 c += 1
                 
         else:
-             c = 0
+            c = 0
             for t in range(indices[0], indices[-1] + 1, 1):
                 X[c, :] = (np.array(self.x[t - self.window: t]))
                 Y[c, :] = (np.array(self.y[t-1]))

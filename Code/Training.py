@@ -5,7 +5,7 @@ from Models import create_model_S4D
 from DatasetsClass import DataGeneratorPickles
 import numpy as np
 import random
-from Metrics import ESR, STFT_t, STFT_f, RMSE, flux, MFCC
+from Metrics import ESR, STFT_t, STFT_f, RMSE, flux
 import sys
 import time
 
@@ -61,7 +61,6 @@ def train(**kwargs):
     gpu = tf.config.experimental.list_physical_devices('GPU')
     if len(gpu) != 0:
         tf.config.experimental.set_memory_growth(gpu[0], True)
-        # tf.config.experimental.set_virtual_device_configuration(gpu, [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=18000)])
 
     fs = 48000
 
@@ -71,7 +70,7 @@ def train(**kwargs):
     
     # create the model
     if model_name == 'S4D':
-        model = create_model_S4D(cond_dim=D, input_dim=w, units=units, order=order, film=film, glu=glu, gcu=gcu, gaf=gaf, act=act, b_size=b_size)
+        model = create_model_S4D(D=D, T=w, units=units, order=order, film=film, glu=glu, gcu=gcu, gaf=gaf, act=act, batch_size=batch_size)
     else:
         model = None
    
@@ -94,9 +93,9 @@ def train(**kwargs):
 
         # create the DataGenerator object to retrieve the data
         train_gen = DataGeneratorPickles(data_dir, dataset + '_train.pickle', input_enc_size=e,
-                                          input_dec_size=d, cond_size=D, model=model_name, conditioning=conditioning, batch_size=b_size)
+                                          input_dec_size=d, cond_size=D, model=model_name, conditioning=conditioning, batch_size=batch_size)
         val_gen = DataGeneratorPickles(data_dir, dataset + '_val.pickle', input_enc_size=e,
-                                        input_dec_size=d, cond_size=D, model=model_name, conditioning=conditioning, batch_size=b_size)
+                                        input_dec_size=d, cond_size=D, model=model_name, conditioning=conditioning, batch_size=batch_size)
          
         # the number of total training steps
         training_steps = train_gen.training_steps
@@ -111,7 +110,7 @@ def train(**kwargs):
         loss_val = np.empty(epochs)
 
         # train the model
-        for i in range(epochs0, epochs1, 1):
+        for i in range(epochs):
             print('epochs:', i+1)
             # reset the model's states
             model.reset_states()
@@ -156,7 +155,7 @@ def train(**kwargs):
 
     # compute test loss
     test_gen = DataGeneratorPickles(data_dir, dataset + '_val.pickle', input_enc_size=e, input_dec_size=d,
-                                    cond_size=D, model=model_name, conditioning=conditioning, batch_size=b_size)
+                                    cond_size=D, model=model_name, conditioning=conditioning, batch_size=batch_size)
     model.reset_states()
     predictions = model.predict(test_gen, verbose=0)[:, 0]
 
