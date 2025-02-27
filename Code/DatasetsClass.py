@@ -65,7 +65,7 @@ class DataGeneratorPickles(Sequence):
 
     def __len__(self):
         # compute the needed number of iterations before conclude one epoch
-        return int((self.x.shape[1]) / self.batch_size)-1
+        return int((self.x.shape[1]))-1
 
     def __call__(self):
         for i in range(self.__len__()):
