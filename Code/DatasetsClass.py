@@ -38,12 +38,13 @@ class DataGeneratorPickles(Sequence):
         
         # remove the last samples if not enough for a batch
         lim = int((self.x.shape[0] / self.batch_size) * self.batch_size)
-        self.x = self.x[:lim]
-        self.y = self.y[:lim]
+        self.x = self.x[:lim].reshape(self.batch_size, -1)
+        self.y = self.y[:lim].reshape(self.batch_size, -1)
         self.conditioning = conditioning
             
         self.z = np.array(Z['z'], dtype=np.float32)
-        self.z = np.repeat(self.z, rep, axis=1)
+        self.z = np.repeat(self.z, rep, axis=1).T
+        self.z = self.z.reshape(self.batch_size, -1, self.z.shape[1])
     
         del Z
 
@@ -60,11 +61,11 @@ class DataGeneratorPickles(Sequence):
 
     def on_epoch_end(self):
         # create/reset the vector containing the indices of the batches
-        self.indices = np.arange(self.x.shape[0] + self.window)
+        self.indices = np.arange(self.x.shape[1] + self.window)
 
     def __len__(self):
         # compute the needed number of iterations before conclude one epoch
-        return int((self.x.shape[0]) / self.batch_size)-1
+        return int((self.x.shape[1]) / self.batch_size)-1
 
     def __call__(self):
         for i in range(self.__len__()):
@@ -74,30 +75,24 @@ class DataGeneratorPickles(Sequence):
 
     def __getitem__(self, idx):
         # Initializing input, target, and conditioning batches
-
-        X = np.empty((self.batch_size, self.window))
-        Y = np.empty((self.batch_size, 1))
-        Z = np.empty((self.batch_size, self.cond_size))
+        # X = np.empty((self.batch_size, self.window))
+        # Y = np.empty((self.batch_size, 1))
+        # Z = np.empty((self.batch_size, self.cond_size))
         
         # get the indices of the requested batch
-        indices = self.indices[idx*self.batch_size:(idx+1)*self.batch_size] + self.window
-
+        indices = self.indices[idx:(idx+1)] + self.window
+        t = indices[0]
         # fill the batches
         if self.cond_size != 0:
-            c = 0
-            for t in range(indices[0], indices[-1] + 1, 1):
-                X[c, :] = (np.array(self.x[t - self.window: t]))
-                Y[c, :] = (np.array(self.y[t-1]))
-                Z[c, :] = (np.array(self.z[:, t-1]).T)
-                c += 1
-                
+
+            X = (np.array(self.x[:, t - self.window: t]))
+            Y = (np.array(self.y[:, t-1]))
+            Z = (np.array(self.z[:, t-1]))
+
         else:
-            c = 0
-            for t in range(indices[0], indices[-1] + 1, 1):
-                X[c, :] = (np.array(self.x[t - self.window: t]))
-                Y[c, :] = (np.array(self.y[t-1]))
-                c += 1
-        
+            X = (np.array(self.x[t - self.window: t]))
+            Y = (np.array(self.y[t-1]))
+
         if self.conditioning:
 
             return [Z, X], Y

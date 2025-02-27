@@ -30,7 +30,7 @@ def train(**kwargs):
 
     """
     data_dir = kwargs.get('data_dir', '../../../Files/')
-    batch_size = kwargs.get('batch_size', 1)
+    batch_size = kwargs.get('b_size', 1)
     learning_rate = kwargs.get('learning_rate', 1e-1)
     units = kwargs.get('units', 16)
     model_save_dir = kwargs.get('model_save_dir', '../../TrainedModels')
@@ -77,7 +77,7 @@ def train(**kwargs):
 
     # define callbacks: where to store the weights
     callbacks = []
-    ckpt_callback, ckpt_callback_latest, ckpt_dir, ckpt_dir_latest = checkpoints(model_save_dir, save_folder, 0.)
+    ckpt_callback, ckpt_callback_latest, ckpt_dir, ckpt_dir_latest = checkpoints(model_save_dir, save_folder)
     
     # if inference is True, it jump directly to the inference section without train the model
     if not inference:
@@ -114,8 +114,8 @@ def train(**kwargs):
             print('epochs:', i+1)
             # reset the model's states
             model.reset_states()
-            if model_name == 'S4D':
-                model.layers[3].reset_states()
+            #if model_name == 'S4D':
+                #model.layers[3].reset_states()
             print(model.optimizer.learning_rate)
 
             results = model.fit(train_gen, epochs=1, verbose=0, shuffle=False, validation_data=val_gen, callbacks=callbacks)

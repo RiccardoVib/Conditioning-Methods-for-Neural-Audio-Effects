@@ -7,7 +7,7 @@ main script
 """
 
 # data_dir: the directory in which datasets are stored
-data_dir = '../../Files/'
+data_dir = '../Files/'
 epochs = 200 # number of epochs
 units = 16 # number of model's units
 b_size = 600 # batch size

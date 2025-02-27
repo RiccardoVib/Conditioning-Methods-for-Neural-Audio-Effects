@@ -146,9 +146,9 @@ class S4DKernel(tf.keras.layers.Layer):
         # Augment B with state
         B = tf.cast(self.B, dtype=tf.complex64)
         #dt = tf.expand_dims(dt, axis=1)
-        s = self.state / tf.cast(dt, dtype=tf.complex64)
-        s = s * dtA * tf.exp(dtA) / (tf.exp(dtA) - 1.)
-        B = tf.concat([s, B], axis=0)  # (1+B H N)
+        #s = self.state / tf.cast(dt, dtype=tf.complex64)
+        #s = s * dtA * tf.exp(dtA) / (tf.exp(dtA) - 1.)
+        #B = tf.concat([s, B], axis=0)  # (1+B H N)
         # # Combine B and C
         C = B[:, None, :, :] * C
         C = tf.reshape(C, [-1, self.H, self.N])
@@ -166,8 +166,8 @@ class S4DKernel(tf.keras.layers.Layer):
         ####States
         K = tf.reshape(K, [-1, 1, self.H, L])  # (1+B C H L)
 
-        state = tf.cast(K[:-1, 0, :, :], dtype=tf.complex64)
-        self.state.assign(state)
+        #state = tf.cast(K[:-1, 0, :, :], dtype=tf.complex64)
+        #self.state.assign(state)
         K = K[-1, 0, :, :]  # (C H L)
 
         return tf.math.real(K)
