@@ -1,47 +1,60 @@
 from Training import train
+import argparse
 
 
 """
 main script
 
 """
+def parse_args():
+    parser = argparse.ArgumentParser(description='Trains an State-based network. Can also be used to run pure inference.')
 
-# data_dir: the directory in which datasets are stored
-data_dir = '../Files/'
-epochs = 200 # number of epochs
-units = 16 # number of model's units
-b_size = 600 # batch size
+    parser.add_argument('--model_save_dir', default='./models', type=str, nargs='?', help='Folder directory in which to store the trained models.')
 
-lr = 3e-4 # initial learning rate
+    parser.add_argument('--data_dir', default='./datasets', type=str, nargs='?', help='Folder directory in which the datasets are stored.')
 
-model = 'S4D'
-datasets = ['SphereC', '8D'] # name of the dataset
+    parser.add_argument('--datasets', default=[" "], type=str, nargs='+', help='The names of the datasets to use.')
+
+    parser.add_argument('--epochs', default=60, type=int, nargs='?', help='Number of training epochs.')
+
+    parser.add_argument('--batch_size', default=1, type=int, nargs='?', help='Batch size.')
+
+    parser.add_argument('--mini_batch_size', default=2400, type=int, nargs='?', help='Mini batch size.')
+
+    parser.add_argument('--units', default=8, nargs='+', help='Hidden layer sizes (amount of units) of the network.')
+
+    parser.add_argument('--learning_rate', default=3e-4, type=float, nargs='?', help='Initial learning rate.')
+
+    parser.add_argument('--order', default=1, type=int, nargs='?', help='Order of transformation (valid only if FiLM).')
+
+    parser.add_argument('--technique', default='ExtraInp', type=str, nargs='?', help='Conditioning technique [ExtraInp, GAF, FILM-GLU, FILM-GCU].')
+
+    parser.add_argument('--only_inference', default=False, type=bool, nargs='?', help='When True, skips training and runs only inference on the pre-model. When False, runs training and inference on the trained model.')
+
+    return parser.parse_args()
 
 
-conditioning = True # if conditioning included
-film = True # if use Film layer
-gaf = False # if use GAF layer
-order = 3 # order of transformation in Film
-glu = True  # if use GLU
-gcu = False # if use GCU
+def start_train(args):
+
+    print("######### Preparing for training/inference #########")
+    print("\n")
+    train(data_dir=args.data_dir,
+          model_save_dir=args.model_save_dir,
+          save_folder=f'{args.model}_{args.dataset}_{args.technique}_{args.order}',
+          dataset=args.datasets,
+          epochs=args.epochs,
+          b_size=args.batch_size,
+          mini_batch_size=args.mini_batch_size,
+          units=args.units,
+          learning_rate=args.learning_rate,
+          order=args.order,
+          technique=args.technique,
+          inference=args.only_inference)
 
 
-name_model = ''
+def main():
+    args = parse_args()
+    start_train(args)
 
-for dataset in datasets:
-      train(data_dir=data_dir,
-            save_folder=model+dataset+name_model,
-            dataset=dataset,
-            b_size=b_size,
-            order=order,
-            glu=glu,
-            gcu=gcu,
-            gaf=gaf,
-            conditioning=conditioning,
-            act=None,
-            film=film,
-            learning_rate=lr,
-            units=units,
-            epochs=epochs,
-            model=model,
-            inference=False)
+if __name__ == '__main__':
+    main()

@@ -23,14 +23,11 @@ def train(**kwargs):
       :param epochs: the number of epochs [int]
       :param order: the order for the Film transformation [int]
       :param act: the activation function [string]
-      :param conditioning: if conditioning [bool]
-      :param glu: if include GLU [bool]
-      :param gcu: if include GCU  [bool]
-      :param gaf: if include GAF [bool]
-
+      :param technique: conditioning technique [string]
     """
     data_dir = kwargs.get('data_dir', '../../../Files/')
     batch_size = kwargs.get('b_size', 1)
+    mini_batch_size = kwargs.get('mini_batch_size', 2400)
     learning_rate = kwargs.get('learning_rate', 1e-1)
     units = kwargs.get('units', 16)
     model_save_dir = kwargs.get('model_save_dir', '../../TrainedModels')
@@ -42,12 +39,7 @@ def train(**kwargs):
     
     order = kwargs.get('order', 1)
     act = kwargs.get('act', None)
-    film = kwargs.get('film', True)
-    conditioning = kwargs.get('conditioning', True)
-    glu = kwargs.get('glu', True)
-    gcu = kwargs.get('gcu', False)
-    gaf = kwargs.get('gaf', True)
-
+    technique = kwargs.get('technique', '')
 
     start = time.time()
     
@@ -63,14 +55,12 @@ def train(**kwargs):
         tf.config.experimental.set_memory_growth(gpu[0], True)
 
     fs = 48000
-
     D = 2
-    e=d=32
     w = 64
     
     # create the model
     if model_name == 'S4D':
-        model = create_model_S4D(D=D, T=w, units=units, order=order, film=film, glu=glu, gcu=gcu, gaf=gaf, act=act, batch_size=batch_size)
+        model = create_model_S4D(D=D, T=w, units=units, order=order, technique=technique, mini_batch_size=mini_batch_size, batch_size=batch_size)
     else:
         model = None
    
@@ -92,10 +82,10 @@ def train(**kwargs):
             print("Initializing random weights.")
 
         # create the DataGenerator object to retrieve the data
-        train_gen = DataGeneratorPickles(data_dir, dataset + '_train.pickle', input_enc_size=e,
-                                          input_dec_size=d, cond_size=D, model=model_name, conditioning=conditioning, batch_size=batch_size)
-        val_gen = DataGeneratorPickles(data_dir, dataset + '_val.pickle', input_enc_size=e,
-                                        input_dec_size=d, cond_size=D, model=model_name, conditioning=conditioning, batch_size=batch_size)
+        train_gen = DataGeneratorPickles(data_dir, dataset + '_train.pickle', input_size=w,
+                                          cond_size=D, technique=technique, mini_batch_size=mini_batch_size, batch_size=batch_size)
+        val_gen = DataGeneratorPickles(data_dir, dataset + '_val.pickle', input_size=w,
+                                          cond_size=D, technique=technique, mini_batch_size=mini_batch_size, batch_size=batch_size)
          
         # the number of total training steps
         training_steps = train_gen.training_steps
@@ -136,8 +126,7 @@ def train(**kwargs):
         plotTraining(loss_training, loss_val, model_save_dir, save_folder, str(epochs))
 
         print("Training done")
-        
-        
+
     avg_time_epoch = (time.time() - start)
 
     sys.stdout.write(f" Average time/epoch {'{:.3f}'.format(avg_time_epoch/60)} min")
@@ -154,21 +143,26 @@ def train(**kwargs):
         print("Something is wrong.")
 
     # compute test loss
-    test_gen = DataGeneratorPickles(data_dir, dataset + '_val.pickle', input_enc_size=e, input_dec_size=d,
-                                    cond_size=D, model=model_name, conditioning=conditioning, batch_size=batch_size)
+    test_gen = DataGeneratorPickles(data_dir, dataset + '_val.pickle', input_size=w,
+                                    cond_size=D, technique=technique, mini_batch_size=mini_batch_size, batch_size=batch_size)
     model.reset_states()
-    predictions = model.predict(test_gen, verbose=0)[:, 0]
+    predictions = model.predict(test_gen, verbose=0).flatten()
+
+    x_test, y_test = test_gen.getXY()
+    y_test = y_test.reshape(-1)
+    x_test = x_test.reshape(-1)
+
 
     # plot and render the output audio file, together with the input and target
     predictWaves(predictions, test_gen.x[w:len(predictions)+w], test_gen.y[w:len(predictions)+w], model_save_dir, save_folder, fs, '0')
-     
-    mse = tf.keras.metrics.mean_squared_error(test_gen.y[w:len(predictions)+w], predictions)
-    mae = tf.keras.metrics.mean_absolute_error(test_gen.y[w:len(predictions)+w], predictions)
-    esr = ESR(test_gen.y[w:len(predictions)+w], predictions)
-    rmse = RMSE(test_gen.y[w:len(predictions)+w], predictions)
-    sftf_t =STFT_t(test_gen.y[w:len(predictions)+w], predictions)
-    sftf_f = STFT_f(test_gen.y[w:len(predictions)+w], predictions)
-    spectral_flux = flux(test_gen.y[w:len(predictions)+w], predictions, fs)
+
+    mse = tf.keras.metrics.mean_squared_error(y_test, predictions)
+    mae = tf.keras.metrics.mean_absolute_error(y_test, predictions)
+    esr = ESR(y_test, predictions)
+    rmse = RMSE(y_test, predictions)
+    sftf_t =STFT_t(y_test, predictions)
+    sftf_f = STFT_f(y_test, predictions)
+    spectral_flux = flux(y_test, predictions)
 
     results_ = {'mse': mse, 'mae': mae, 'esr': esr, 'rmse': rmse, 'spectral_flux': spectral_flux, 'sftf_t': sftf_t, 'sftf_f': sftf_f}
 
