@@ -1,4 +1,4 @@
-# Conditioning-Methods-for-Neural-Audio-Effects
+# Conditioning Methods for Neural Audio Effects
 
 This code repository for the article _Conditioning Methods for Neural Audio Effects_, Proceedings of the SMC Conferences. SMC Network, 2024.
 
