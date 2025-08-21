@@ -20,8 +20,9 @@
 import tensorflow as tf
 from einops import repeat
 import numpy as np
-### code adapted from https://github.com/state-spaces/s4/blob/main/models/s4/
-
+'''
+code adapted from https://github.com/state-spaces/s4/blob/main/models/s4/
+'''
 
 def selective_scan(u, dA, dB, dC, D, last_state, stateful):
     ub = u
