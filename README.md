@@ -6,6 +6,7 @@ This repository contains all the necessary utilities to use our architectures. F
 
 Visit our [companion page with audio examples](https://riccardovib.github.io/Conditioning-Methods-for-Neural-Audio-Effects_pages/)
 
+
 ### Contents
 
 1. [Datasets](#datasets)
@@ -56,3 +57,15 @@ Example inference case:
 cd ./Code/
 python starter.py --datasets Compressor --technique FILM-GLU --order 3 --only_inference True
 ```
+
+# Bibtex
+
+If you use the code included in this repository or any part of it, please acknowledge 
+its authors by adding a reference to these publications:
+
+@inproceedings{simionato2024conditioning,
+  title={Conditioning Methods for Neural Audio Effects},
+  author={Simionato, R and Fasciani, S},
+  booktitle={Proceedings of the International Conference on Sound and Music Computing (SMC24)},
+  year={2024}
+}
